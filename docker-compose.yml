@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  web:
+  progress-tracker-api:
     build: .
     image: nikiskaarup/progress-tracker-api:latest
     pull_policy: build
