@@ -1,0 +1,37 @@
+{
+  "name": "progress-tracker-api",
+  "version": "1.0.50",
+  "private": true,
+  "type": "module",
+  "module": "src/index.js",
+  "scripts": {
+    "migrate": "bun --bun run ./src/db/migrate.js",
+    "generate": "drizzle-kit generate:sqlite --config=./drizzle.config.js",
+    "studio": "bunx --bun drizzle-kit studio --config=./drizzle.config.js",
+    "start": "bun run src/index.js",
+    "dev": "bun run --watch src/index.js",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --apply .",
+    "format": "biome format --write .",
+    "fmt": "biome format --write ."
+  },
+  "dependencies": {
+    "@elysiajs/bearer": "^1.0.2",
+    "@elysiajs/cors": "^1.0.2",
+    "drizzle-kit": "^0.20.14",
+    "drizzle-orm": "^0.30.7",
+    "elysia": "latest",
+    "nanoid": "^5.0.6",
+    "sqids": "^0.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.6.4",
+    "@types/bun": "latest",
+    "typescript": "^5.4.4"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome",
+    "esbuild",
+    "es5-ext"
+  ]
+}
