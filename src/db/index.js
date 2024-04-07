@@ -5,22 +5,22 @@ import { migrate } from 'drizzle-orm/bun-sqlite/migrator';
 import { createWrappedTimer } from '../wrapped-timer';
 
 function initDb() {
-	global.db.query('PRAGMA journal_mode = WAL;').run();
-	global.db.query('PRAGMA synchronous = NORMAL;').run();
+	global.db.query('PRAGMA journal_mode = WAL').run();
+	global.db.query('PRAGMA synchronous = NORMAL').run();
 
-	// global.DB.query('PRAGMA journal_mode = delete;');
-	// global.DB.query('PRAGMA journal_mode = WAL2;');
+	// global.DB.query('PRAGMA journal_mode = delete');
+	// global.DB.query('PRAGMA journal_mode = WAL2');
 
-	global.db.query('PRAGMA auto_vacuum = INCREMENTAL;').run();
-	global.db.query('PRAGMA wal_autocheckpoint = 1000;').run();
+	global.db.query('PRAGMA auto_vacuum = INCREMENTAL').run();
+	global.db.query('PRAGMA wal_autocheckpoint = 1000').run();
 }
 
 function vacuumDb() {
-	global.db.query('PRAGMA incremental_vacuum;').run();
+	global.db.query('PRAGMA incremental_vacuum').run();
 }
 
 function optimizeDb() {
-	global.db.query('PRAGMA optimize;').run();
+	global.db.query('PRAGMA optimize').run();
 }
 
 if (global.db === undefined || global.drizzleDB === undefined) {
