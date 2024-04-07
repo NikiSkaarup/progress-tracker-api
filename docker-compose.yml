@@ -12,6 +12,6 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      - BEARER_TOKEN: ${BEARER_TOKEN}
-      - SQLITE_DB_PATH: ${SQLITE_DB_PATH}
-      - SQLITE_DB_NAME: ${SQLITE_DB_NAME}
+      BEARER_TOKEN: ${BEARER_TOKEN}
+      SQLITE_DB_PATH: ${SQLITE_DB_PATH}
+      SQLITE_DB_NAME: ${SQLITE_DB_NAME}
