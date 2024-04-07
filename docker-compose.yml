@@ -6,6 +6,6 @@ services:
     image: nikiskaarup/progress-tracker-api:latest
     pull_policy: build
     ports:
-      - "3000:3000"
+      - "3011:3000"
     container_name: progress-tracker-api
     restart: unless-stopped
