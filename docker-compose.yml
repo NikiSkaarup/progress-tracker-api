@@ -9,6 +9,8 @@ services:
       - "3011:3011"
     container_name: progress-tracker-api
     restart: unless-stopped
+    volumes:
+      - ./data:/app/data
     environment:
       - BEARER_TOKEN=${BEARER_TOKEN}
       - SQLITE_DB_PATH=${SQLITE_DB_PATH}
