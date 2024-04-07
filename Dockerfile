@@ -42,7 +42,7 @@ ENV SQLITE_DB_PATH $SQLITE_DB_PATH
 ENV SQLITE_DB_NAME $SQLITE_DB_NAME
 
 # run the app
-USER bun
+#USER bun
 EXPOSE 3011/tcp
 
 ENTRYPOINT [ "bun", "run", "start" ]
