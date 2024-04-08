@@ -36,6 +36,10 @@ function getBookmarks(stateBookmarks = undefined) {
 		/** @type {Array<SelectBookmarkWithOptionalTags>}  */
 		const bookmarks = drizzleDB.select().from(bookmark).all();
 
+		if (bookmarks.length === 0) {
+			return [];
+		}
+
 		const bookmarksWithTags = bookmarks.map((bookmark) => {
 			bookmark.tags = getBookmarkTags.all({ $id: bookmark.id });
 			return /** @type {SelectBookmarkWithTags}  */ (bookmark);
@@ -85,13 +89,26 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 				return store.bookmarks.items;
 			}
 
-			const search = query.q;
+			const search = query.q.trim();
+			if (search.length === 0) {
+				return [];
+			}
 
-			return drizzleDB
+			/** @type {Array<SelectBookmarkWithOptionalTags>}  */
+			const bookmarks = drizzleDB
 				.select()
 				.from(bookmark)
 				.where(like(bookmark.name, `%${search}%`))
 				.all();
+
+			if (bookmarks.length === 0) {
+				return [];
+			}
+
+			return bookmarks.map((bookmark) => {
+				bookmark.tags = getBookmarkTags.all({ $id: bookmark.id });
+				return /** @type {SelectBookmarkWithTags}  */ (bookmark);
+			});
 		},
 		{
 			query: t.Object({
