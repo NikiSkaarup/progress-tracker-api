@@ -21,13 +21,12 @@
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.30.7",
     "elysia": "latest",
-    "nanoid": "^5.0.6",
-    "sqids": "^0.3.0"
+    "nanoid": "^5.0.7"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.6.4",
     "@types/bun": "latest",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "trustedDependencies": ["@biomejs/biome", "esbuild", "es5-ext"]
 }
