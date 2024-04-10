@@ -54,9 +54,7 @@
       "indexes": {
         "bookmarkFinishedIndex": {
           "name": "bookmarkFinishedIndex",
-          "columns": [
-            "finished"
-          ],
+          "columns": ["finished"],
           "isUnique": false,
           "where": "finished = 1"
         }
@@ -96,12 +94,8 @@
           "name": "bookmark_tag_bookmark_id_bookmark_id_fk",
           "tableFrom": "bookmark_tag",
           "tableTo": "bookmark",
-          "columnsFrom": [
-            "bookmark_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["bookmark_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -109,22 +103,15 @@
           "name": "bookmark_tag_tag_id_tag_id_fk",
           "tableFrom": "bookmark_tag",
           "tableTo": "tag",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "bookmark_tag_bookmark_id_tag_id_pk": {
-          "columns": [
-            "bookmark_id",
-            "tag_id"
-          ],
+          "columns": ["bookmark_id", "tag_id"],
           "name": "bookmark_tag_bookmark_id_tag_id_pk"
         }
       },
