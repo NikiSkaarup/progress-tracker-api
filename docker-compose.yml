@@ -15,7 +15,7 @@ services:
       BEARER_TOKEN: ${BEARER_TOKEN}
       SQLITE_DB_PATH: ${SQLITE_DB_PATH}
       SQLITE_DB_NAME: ${SQLITE_DB_NAME}
-
+    network_mode: bridge
 
 volumes:
   data:

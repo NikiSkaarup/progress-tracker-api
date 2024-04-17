@@ -19,12 +19,12 @@
     "@elysiajs/bearer": "^1.0.2",
     "@elysiajs/cors": "^1.0.2",
     "drizzle-kit": "^0.20.14",
-    "drizzle-orm": "^0.30.7",
+    "drizzle-orm": "^0.30.8",
     "elysia": "latest",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.6.4",
+    "@biomejs/biome": "^1.7.0",
     "@types/bun": "latest",
     "typescript": "^5.4.5"
   },
