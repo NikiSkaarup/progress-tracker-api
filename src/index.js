@@ -6,87 +6,25 @@ import { eq, like, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import colors from './colors';
 import { drizzleDB } from './db';
-import { bookmark, bookmarkTag, tag } from './db/schema';
+import { bookmark } from './db/schema';
 
 /** @typedef {import('./db/schema').SelectBookmarkWithTags} SelectBookmarkWithTags */
 /** @typedef {import('./db/schema').SelectBookmarkWithOptionalTags} SelectBookmarkWithOptionalTags */
+/** @typedef {import('./db/schema').SelectBookmark} SelectBookmark */
 
-const getBookmarkTags = drizzleDB
-	.select({
-		id: tag.id,
-		name: tag.name,
-		variant: tag.variant,
-		createdAt: tag.createdAt,
-		updatedAt: tag.updatedAt,
-	})
-	.from(tag)
-	.innerJoin(bookmarkTag, eq(tag.id, bookmarkTag.tagId))
-	.where(eq(bookmarkTag.bookmarkId, sql.placeholder('$id')))
+const getBookmarks = drizzleDB.select().from(bookmark).prepare();
+const getBookmarksSearchName = drizzleDB
+	.select()
+	.from(bookmark)
+	.where(like(bookmark.name, sql.placeholder('search')))
 	.prepare();
 
-/**
- * Get all bookmarks with tags
- * @param {{items: Array<SelectBookmarkWithTags>} | undefined} stateBookmarks
- * @returns {Array<SelectBookmarkWithTags>}
- */
-function getBookmarks(stateBookmarks = undefined) {
-	try {
-		performance.mark('getBookmarks');
-
-		/** @type {Array<SelectBookmarkWithOptionalTags>}  */
-		const bookmarks = drizzleDB.select().from(bookmark).all();
-
-		if (bookmarks.length === 0) {
-			return [];
-		}
-
-		const bookmarksWithTags = bookmarks.map((bookmark) => {
-			bookmark.tags = getBookmarkTags.all({ $id: bookmark.id });
-			return /** @type {SelectBookmarkWithTags}  */ (bookmark);
-		});
-
-		if (stateBookmarks !== undefined) {
-			stateBookmarks.items = bookmarksWithTags;
-		}
-
-		return bookmarksWithTags;
-	} catch (error) {
-		console.error(error);
-	} finally {
-		performance.measure('getBookmarks', 'getBookmarks');
-	}
-	return [];
-}
-
-let isUpdatingBookmarks = false;
-/**
- * Get all bookmarks with tags
- * @param {{items: Array<SelectBookmarkWithTags>} | undefined} stateBookmarks
- */
-function updateBookmarks(stateBookmarks) {
-	if (!stateBookmarks) {
-		return;
-	}
-	if (isUpdatingBookmarks) {
-		return;
-	}
-	isUpdatingBookmarks = true;
-	try {
-		setImmediate(getBookmarks, stateBookmarks);
-	} catch (e) {
-		console.error(e);
-	} finally {
-		isUpdatingBookmarks = false;
-	}
-}
-
 const bookmarks = new Elysia({ prefix: '/bookmarks' })
-	.state('bookmarks', { items: getBookmarks() })
 	.get(
 		'/',
-		({ query, store }) => {
+		({ query }) => {
 			if (query.q === undefined || query.q === '') {
-				return store.bookmarks.items;
+				return getBookmarks.all();
 			}
 
 			const search = query.q.trim();
@@ -94,21 +32,7 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 				return [];
 			}
 
-			/** @type {Array<SelectBookmarkWithOptionalTags>}  */
-			const bookmarks = drizzleDB
-				.select()
-				.from(bookmark)
-				.where(like(bookmark.name, `%${search}%`))
-				.all();
-
-			if (bookmarks.length === 0) {
-				return [];
-			}
-
-			return bookmarks.map((bookmark) => {
-				bookmark.tags = getBookmarkTags.all({ $id: bookmark.id });
-				return /** @type {SelectBookmarkWithTags}  */ (bookmark);
-			});
+			return getBookmarksSearchName.all({ search: `%${search}%` });
 		},
 		{
 			query: t.Object({
@@ -118,9 +42,20 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	)
 	.post(
 		'/',
-		async ({ body, store }) => {
+		async ({ body }) => {
 			await drizzleDB.insert(bookmark).values(body).execute();
-			updateBookmarks(store.bookmarks);
+		},
+		{
+			body: t.Object({
+				name: t.String(),
+				href: t.String(),
+			}),
+		},
+	)
+	.put(
+		'/',
+		async ({ body }) => {
+			await drizzleDB.update(bookmark).set(body).where(eq(bookmark.name, body.name)).execute();
 		},
 		{
 			body: t.Object({
@@ -131,9 +66,8 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	)
 	.put(
 		'/:id',
-		async ({ params, body, store }) => {
+		async ({ params, body }) => {
 			await drizzleDB.update(bookmark).set(body).where(eq(bookmark.id, params.id)).execute();
-			updateBookmarks(store.bookmarks);
 		},
 		{
 			params: t.Object({
@@ -147,14 +81,13 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	)
 	.put(
 		'/:id/check/:finished',
-		async ({ params, store }) => {
+		async ({ params }) => {
 			await drizzleDB
 				.update(bookmark)
 				.set({ finished: params.finished })
 				.where(eq(bookmark.id, params.id))
 				.prepare()
 				.execute();
-			updateBookmarks(store.bookmarks);
 		},
 		{
 			params: t.Object({
@@ -165,9 +98,8 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	)
 	.delete(
 		'/:id',
-		async ({ params, store }) => {
+		async ({ params }) => {
 			await drizzleDB.delete(bookmark).where(eq(bookmark.id, params.id)).execute();
-			updateBookmarks(store.bookmarks);
 		},
 		{
 			params: t.Object({
@@ -196,27 +128,28 @@ const app = new Elysia()
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
 
-if (env.NODE_ENV !== 'production') {
-	// when running in development mode, log performance measures
+// if (env.NODE_ENV !== 'production') {
+// when running in development mode, log performance measures
 
-	/** @type {import('node:perf_hooks').PerformanceObserverCallback} */
-	function observerCallback(entries) {
-		const entriesArr = [...entries.getEntries()];
-		for (let i = entriesArr.length; i--; ) {
-			const entry = entriesArr[i];
-			if (entry.entryType === 'measure') {
-				console.info(
-					`${colors.fgGreen}${entry.name}${colors.reset} ${colors.fgYellow}${entry.duration
-						.toFixed(3)
-						.padStart(7, '0')}${colors.reset}ms`,
-				);
-			}
+/** @type {import('node:perf_hooks').PerformanceObserverCallback} */
+function observerCallback(entries) {
+	const entriesArr = [...entries.getEntries()];
+	for (let i = entriesArr.length; i--; ) {
+		const entry = entriesArr[i];
+		if (entry.entryType === 'measure') {
+			console.info(
+				`${colors.fgGreen}${entry.name}${colors.reset} ${colors.fgYellow}${entry.duration
+					.toFixed(3)
+					.padStart(7, '0')}${colors.reset}ms`,
+			);
 		}
 	}
-
-	if (globalThis.performanceObserver) {
-		globalThis.performanceObserver.disconnect();
-	}
-	globalThis.performanceObserver = new PerformanceObserver(observerCallback);
-	globalThis.performanceObserver.observe({ entryTypes: ['measure'] });
 }
+
+// @ts-ignore
+if (globalThis.performanceObserver !== undefined) {
+	globalThis.performanceObserver.disconnect();
+}
+globalThis.performanceObserver = new PerformanceObserver(observerCallback);
+globalThis.performanceObserver.observe({ entryTypes: ['measure'] });
+// }

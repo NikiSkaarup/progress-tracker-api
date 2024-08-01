@@ -1,0 +1,1 @@
+CREATE INDEX `bookmarkNameIndex` ON `bookmark` (`name`);

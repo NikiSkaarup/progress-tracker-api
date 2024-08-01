@@ -20,6 +20,7 @@ export const bookmark = sqliteTable(
 	},
 	(t) => ({
 		bookmarkFinishedIndex: index('bookmarkFinishedIndex').on(t.finished).where(sql`finished = 1`),
+		bookmarkNameIndex: index('bookmarkNameIndex').on(t.name),
 	}),
 );
 

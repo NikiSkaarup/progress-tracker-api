@@ -1,6 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
+  "id": "58b7e67f-0f36-4ec7-82ee-9625a3991719",
+  "prevId": "7cf0481a-3066-4e36-b80e-49c72fa6f30e",
   "tables": {
     "bookmark": {
       "name": "bookmark",
@@ -55,7 +57,14 @@
           "columns": [
             "finished"
           ],
-          "where": "finished = 1",
+          "isUnique": false,
+          "where": "finished = 1"
+        },
+        "bookmarkNameIndex": {
+          "name": "bookmarkNameIndex",
+          "columns": [
+            "name"
+          ],
           "isUnique": false
         }
       },
@@ -93,28 +102,28 @@
         "bookmark_tag_bookmark_id_bookmark_id_fk": {
           "name": "bookmark_tag_bookmark_id_bookmark_id_fk",
           "tableFrom": "bookmark_tag",
+          "tableTo": "bookmark",
           "columnsFrom": [
             "bookmark_id"
           ],
-          "tableTo": "bookmark",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "bookmark_tag_tag_id_tag_id_fk": {
           "name": "bookmark_tag_tag_id_tag_id_fk",
           "tableFrom": "bookmark_tag",
+          "tableTo": "tag",
           "columnsFrom": [
             "tag_id"
           ],
-          "tableTo": "tag",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -176,9 +185,11 @@
   },
   "enums": {},
   "_meta": {
+    "schemas": {},
     "tables": {},
     "columns": {}
   },
-  "id": "7cf0481a-3066-4e36-b80e-49c72fa6f30e",
-  "prevId": "00000000-0000-0000-0000-000000000000"
+  "internal": {
+    "indexes": {}
+  }
 }
