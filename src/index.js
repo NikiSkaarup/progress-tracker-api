@@ -59,12 +59,13 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 				const bm = trx.select().from(bookmark).where(eq(bookmark.name, body.name)).get();
 				if (bm === undefined) {
 					await trx.insert(bookmark).values(body).execute();
-					return;
+					return true;
 				}
 				await trx.update(bookmark).set(body).where(eq(bookmark.name, body.name)).execute();
+				return false;
 			});
 
-			await tx;
+			return { created: await tx };
 		},
 		{
 			body: t.Object({
