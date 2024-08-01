@@ -55,7 +55,16 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	.put(
 		'/',
 		async ({ body }) => {
-			await drizzleDB.update(bookmark).set(body).where(eq(bookmark.name, body.name)).execute();
+			const tx = drizzleDB.transaction(async (trx) => {
+				const bm = trx.select().from(bookmark).where(eq(bookmark.name, body.name)).get();
+				if (bm === undefined) {
+					await trx.insert(bookmark).values(body).execute();
+					return;
+				}
+				await trx.update(bookmark).set(body).where(eq(bookmark.name, body.name)).execute();
+			});
+
+			await tx;
 		},
 		{
 			body: t.Object({
