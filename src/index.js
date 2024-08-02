@@ -1,45 +1,32 @@
 import { PerformanceObserver } from 'node:perf_hooks';
 import { bearer } from '@elysiajs/bearer';
 import { cors } from '@elysiajs/cors';
+import serverTiming from '@elysiajs/server-timing';
 import { env } from 'bun';
-import { eq, like, sql } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { nanoid } from 'nanoid';
 import colors from './colors';
-import { drizzleDB } from './db';
+import { db, drizzleDB } from './db';
 import { bookmark } from './db/schema';
 
-/** @typedef {import('./db/schema').SelectBookmarkWithTags} SelectBookmarkWithTags */
-/** @typedef {import('./db/schema').SelectBookmarkWithOptionalTags} SelectBookmarkWithOptionalTags */
 /** @typedef {import('./db/schema').SelectBookmark} SelectBookmark */
 
-const getBookmarks = drizzleDB.select().from(bookmark).prepare();
-const getBookmarksSearchName = drizzleDB
-	.select()
-	.from(bookmark)
-	.where(like(bookmark.name, sql.placeholder('search')))
-	.prepare();
+// /** @type {import('bun:sqlite').Statement<void, Array<{
+//  * id: number;
+//  * name: string;
+//  * href: string;
+//  * finished: boolean;
+//  * createdAt: number;
+//  * updatedAt: number;
+//  * }>>}
+//  */
+// const getBookmarks2 = db.query('SELECT * FROM bookmark ORDER BY id DESC');
+
+const getBookmarks = drizzleDB.select().from(bookmark).orderBy(desc(bookmark.id)).prepare();
 
 const bookmarks = new Elysia({ prefix: '/bookmarks' })
-	.get(
-		'/',
-		({ query }) => {
-			if (query.q === undefined || query.q === '') {
-				return getBookmarks.all();
-			}
-
-			const search = query.q.trim();
-			if (search.length === 0) {
-				return [];
-			}
-
-			return getBookmarksSearchName.all({ search: `%${search}%` });
-		},
-		{
-			query: t.Object({
-				q: t.Optional(t.String()),
-			}),
-		},
-	)
+	.get('/', () => getBookmarks.all())
 	.post(
 		'/',
 		async ({ body }) => {
@@ -96,7 +83,6 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 				.update(bookmark)
 				.set({ finished: params.finished })
 				.where(eq(bookmark.id, params.id))
-				.prepare()
 				.execute();
 		},
 		{
@@ -119,13 +105,29 @@ const bookmarks = new Elysia({ prefix: '/bookmarks' })
 	);
 
 const app = new Elysia()
+	.derive(() => ({
+		requestId: nanoid(),
+	}))
+	.onBeforeHandle((ctx) => {
+		performance.mark(ctx.requestId);
+	})
+	.onAfterHandle((ctx) => {
+		performance.measure(ctx.requestId, ctx.requestId);
+	})
+	.use(
+		serverTiming({
+			enabled: true,
+			allow: true,
+			report: false,
+		}),
+	)
 	.use(cors())
-	.get('/', () => 'Hello, Elysia!')
+	.get('/', () => 'Hello, PT API!')
 	.use(bearer())
 	.guard(
 		{
 			beforeHandle({ set, bearer }) {
-				if (!bearer || bearer !== env.BEARER_TOKEN) {
+				if (bearer === undefined || bearer !== env.BEARER_TOKEN) {
 					set.status = 400;
 					set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
 					return 'Unauthorized';
@@ -136,7 +138,7 @@ const app = new Elysia()
 	)
 	.listen(env.PORT || 3000);
 
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
+console.log(`Progress tracker api is running at ${app.server?.hostname}:${app.server?.port}`);
 
 // if (env.NODE_ENV !== 'production') {
 // when running in development mode, log performance measures

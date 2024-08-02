@@ -35,6 +35,8 @@ function getCallbackHandler(key, callback, ...args) {
 		try {
 			thisTimer.running = true;
 			await callback(...args);
+		} catch (e) {
+			console.error(e);
 		} finally {
 			thisTimer.running = false;
 		}
