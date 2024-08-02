@@ -5,12 +5,11 @@ import { migrate } from 'drizzle-orm/bun-sqlite/migrator';
 import { createWrappedTimer } from '../wrapped-timer';
 
 function initDb() {
+	// journal_mode = delete to cleanup wal files on launch
+	global.db.query('PRAGMA journal_mode = delete');
+	// global.db.query('PRAGMA journal_mode = WAL2');
 	global.db.query('PRAGMA journal_mode = WAL').run();
 	global.db.query('PRAGMA synchronous = NORMAL').run();
-
-	// global.DB.query('PRAGMA journal_mode = delete');
-	// global.DB.query('PRAGMA journal_mode = WAL2');
-
 	global.db.query('PRAGMA auto_vacuum = INCREMENTAL').run();
 	global.db.query('PRAGMA wal_autocheckpoint = 1000').run();
 }
