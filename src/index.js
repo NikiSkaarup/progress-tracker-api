@@ -12,20 +12,21 @@ import { bookmark } from './db/schema';
 
 /** @typedef {import('./db/schema').SelectBookmark} SelectBookmark */
 
-// /** @type {import('bun:sqlite').Statement<void, Array<{
-//  * id: number;
-//  * name: string;
-//  * href: string;
-//  * finished: boolean;
-//  * createdAt: number;
-//  * updatedAt: number;
-//  * }>>}
-//  */
-// const getBookmarks2 = db.query('SELECT * FROM bookmark ORDER BY id DESC');
+/** @type {import('bun:sqlite').Statement<void, Array<{
+ * id: number;
+ * name: string;
+ * href: string;
+ * finished: boolean;
+ * createdAt: number;
+ * updatedAt: number;
+ * }>>}
+ */
+const getBookmarks = db.query('SELECT * FROM bookmark ORDER BY id DESC');
 
-const getBookmarks = drizzleDB.select().from(bookmark).orderBy(desc(bookmark.id)).prepare();
+// const getBookmarks = drizzleDB.select().from(bookmark).orderBy(desc(bookmark.id)).prepare();
 
 const bookmarks = new Elysia({ prefix: '/bookmarks' })
+	// .get('/', () => getBookmarks.all())
 	.get('/', () => getBookmarks.all())
 	.post(
 		'/',
