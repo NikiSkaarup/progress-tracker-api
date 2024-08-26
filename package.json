@@ -22,7 +22,7 @@
     "@elysiajs/server-timing": "^1.1.0",
     "drizzle-kit": "^0.23.2",
     "drizzle-orm": "^0.32.2",
-    "elysia": "^1.1.5",
+    "elysia": "^1.1.7",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {
