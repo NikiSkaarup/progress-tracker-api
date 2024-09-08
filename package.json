@@ -17,12 +17,12 @@
     "fmt": "biome format --write ."
   },
   "dependencies": {
-    "@elysiajs/bearer": "^1.1.1",
-    "@elysiajs/cors": "^1.1.0",
+    "@elysiajs/bearer": "^1.1.2",
+    "@elysiajs/cors": "^1.1.1",
     "@elysiajs/server-timing": "^1.1.0",
     "drizzle-kit": "^0.23.2",
     "drizzle-orm": "^0.32.2",
-    "elysia": "^1.1.11",
+    "elysia": "^1.1.12",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {
