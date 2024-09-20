@@ -28,7 +28,7 @@
       "arrowParentheses": "always",
       "quoteProperties": "preserve",
       "semicolons": "always",
-      "trailingComma": "all",
+      "trailingCommas": "all",
       "indentStyle": "tab",
       "quoteStyle": "single"
     }
